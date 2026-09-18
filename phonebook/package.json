@@ -1,0 +1,16 @@
+{
+  "name": "phonebook",
+  "version": "1.0.0",
+  "description": "phonebook-application",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@apollo/server": "^5.5.1",
+    "graphql": "^16.14.2"
+  }
+}

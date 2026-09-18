@@ -128,6 +128,7 @@ const typeDefs = /* GraphQL */ `
       published: Int!
       genres: [String!]!
     ): Book
+    editAuthor(name: String!, setBornTo: Int!): Author
   }
 `
 
@@ -139,6 +140,8 @@ const booksByAuthor = (authorName) =>
 
 const booksByGenre = (genre) =>
   books.filter((book) => book.genres.includes(genre))
+
+const authorByName = (authorName) => authors.find((a) => a.name === authorName)
 
 const resolvers = {
   Query: {
@@ -163,7 +166,7 @@ const resolvers = {
 
   Mutation: {
     addBook: (root, args) => {
-      if (!authors.find((a) => a.name === args.author)) {
+      if (!authorByName(args.author)) {
         //if author does not exist then add to authors
         const author = { name: args.author, born: null, id: uuidv4() }
         authors = authors.concat(author)
@@ -171,6 +174,16 @@ const resolvers = {
       const book = { ...args, id: uuidv4() }
       books = books.concat(book)
       return book
+    },
+    editAuthor: (root, args) => {
+      const author = authorByName(args.name)
+      if (!author) {
+        return null
+      }
+
+      const updatedAuthor = { ...author, born: args.setBornTo }
+      authors = authors.map((a) => (a.name === args.name ? updatedAuthor : a))
+      return updatedAuthor
     },
   },
 }

@@ -1,5 +1,6 @@
 const { ApolloServer } = require('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
+const { v4: uuidv4 } = require('uuid')
 
 let authors = [
   {
@@ -101,13 +102,13 @@ const typeDefs = /* GraphQL */ `
   type Author {
     name: String!
     id: ID!
-    born: Int!
+    born: Int
     bookCount: Int!
   }
 
   type Book {
     title: String!
-    published: Int
+    published: Int!
     author: String!
     id: ID!
     genres: [String!]!
@@ -116,8 +117,17 @@ const typeDefs = /* GraphQL */ `
   type Query {
     authorCount: Int!
     bookCount(name: String): Int!
-    allBooks(author: String): [Book!]!
+    allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
+  }
+
+  type Mutation {
+    addBook(
+      title: String!
+      author: String!
+      published: Int!
+      genres: [String!]!
+    ): Book
   }
 `
 
@@ -127,13 +137,21 @@ const countBooksByAuthor = (authorName) =>
 const booksByAuthor = (authorName) =>
   books.filter((book) => book.author === authorName)
 
+const booksByGenre = (genre) =>
+  books.filter((book) => book.genres.includes(genre))
+
 const resolvers = {
   Query: {
     authorCount: () => authors.length,
     bookCount: (root, args) =>
       args.name ? countBooksByAuthor(args.name) : books.length,
-    allBooks: (root, args) =>
-      args.author ? booksByAuthor(args.author) : books,
+    allBooks: (root, args) => {
+      if (args.genre) {
+        return booksByGenre(args.genre)
+      }
+
+      return args.author ? booksByAuthor(args.author) : books
+    },
     allAuthors: () => authors,
   },
 
@@ -141,6 +159,19 @@ const resolvers = {
   Author: {
     // receives parent author object as param
     bookCount: (author) => countBooksByAuthor(author.name),
+  },
+
+  Mutation: {
+    addBook: (root, args) => {
+      if (!authors.find((a) => a.name === args.author)) {
+        //if author does not exist then add to authors
+        const author = { name: args.author, born: null, id: uuidv4() }
+        authors = authors.concat(author)
+      }
+      const book = { ...args, id: uuidv4() }
+      books = books.concat(book)
+      return book
+    },
   },
 }
 

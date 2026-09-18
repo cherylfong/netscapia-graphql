@@ -31,3 +31,15 @@ Exclamation marks are used to mark which return values and parameters that canno
 A query can be made to return any field described in the schema.
 
 GraphQL query describes only the data moving between a server and the client. On the server, the data can be organized and saved in any way. GraphQL does not have anything to do with databases. It does not care how the data is saved.
+
+A GraphQL server must define resolvers for each field of each type in the schema. Otherwise, [Apollo GraphQL](https://www.apollographql.com/docs/apollo-server/api/apollo-server/) will define [default resolvers](https://www.graphql-tools.com/docs/resolvers/#default-resolver).
+
+### Mutations
+
+All operations that cause change are done with mutations. Mutations are described in the schema as the keys of type `Mutation`.
+
+Mutations also require a resolver.
+
+### Error Handling
+
+Some error handling are automatically done with GraphQL [validation](https://graphql.org/learn/validation/).

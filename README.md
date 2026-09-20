@@ -65,3 +65,10 @@ Apollo client saves the responses of queries to [cache](https://www.apollographq
 The hook function [useMutation](https://www.apollographql.com/docs/react/api/react/hooks/#usemutation) provides the functionality for making mutations.
 
 A way to keep the cache in sync is to use the useMutation hook's [refetchQueries](https://www.apollographql.com/docs/react/data/refetching/) parameter to define that the query fetching an array for example is done again whenever a new element is created.
+
+#### Apollo Client Handling Application State
+
+It is tyipcal for Apollo Client manage most of the application's state, besides for form state for example. Using Redux or Zustand may not be necessary when using GraphQL.
+
+In some cases, Apollo enables saving the application's local state to Apollo [cache](https://www.apollographql.com/docs/react/local-state/local-state-management/).
+

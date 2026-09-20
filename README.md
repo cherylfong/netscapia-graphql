@@ -43,3 +43,25 @@ Mutations also require a resolver.
 ### Error Handling
 
 Some error handling are automatically done with GraphQL [validation](https://graphql.org/learn/validation/).
+
+## Chapter 3 | React and GraphQL
+
+[Apollo Client](https://www.apollographql.com/docs/react/) handles server communication similar to Axios but is a higher-order library capable of abstracting the unnecessary details of the communication.
+
+Installation
+
+```bash
+npm install @apollo/client graphql
+```
+
+The application can communicate with a GraphQL server using the `client` object. The client can be made accessible for all components of the application by wrapping the App component with `ApolloProvider` component.
+
+Apollo Client offers a few alternatives for making [queries](https://www.apollographql.com/docs/react/data/queries/). Currently, the use of the hook function [useQuery](https://www.apollographql.com/docs/react/api/react/hooks/#usequery) is the dominant practice.
+
+#### Caching and Mutations
+
+Apollo client saves the responses of queries to [cache](https://www.apollographql.com/docs/react/caching/overview). To optimize performance if the response to a query is already in the cache, the query is not sent to the server at all.
+
+The hook function [useMutation](https://www.apollographql.com/docs/react/api/react/hooks/#usemutation) provides the functionality for making mutations.
+
+A way to keep the cache in sync is to use the useMutation hook's [refetchQueries](https://www.apollographql.com/docs/react/data/refetching/) parameter to define that the query fetching an array for example is done again whenever a new element is created.

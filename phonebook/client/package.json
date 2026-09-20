@@ -9,10 +9,13 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.1",
     "vite": "^8.3.0"
   },
   "dependencies": {
     "@apollo/client": "^4.3.1",
-    "graphql": "^16.14.2"
+    "graphql": "^16.14.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   }
 }

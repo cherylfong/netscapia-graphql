@@ -34,6 +34,7 @@ const App = () => {
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
         <button onClick={() => setPage('add')}>add book</button>
+        <button onClick={() => setPage('add')}>set author birth year</button>
       </div>
 
       <Authors authors={result.data.allAuthors} show={page === 'authors'} />
@@ -41,6 +42,7 @@ const App = () => {
       <Books show={page === 'books'} books={books.data?.allBooks ?? []} />
 
       <NewBook show={page === 'add'} />
+
     </div>
   )
 }

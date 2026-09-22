@@ -72,3 +72,16 @@ It is tyipcal for Apollo Client manage most of the application's state, besides 
 
 In some cases, Apollo enables saving the application's local state to Apollo [cache](https://www.apollographql.com/docs/react/local-state/local-state-management/).
 
+## Chapter 4 | Database and User Administration
+
+### Server Application File and Directory Organization
+
+Organization structure of the Server application directory and files:
+
+- `index.js` is the main entry point of the application, whose only responsibility is the startup logic. It ensures that different parts of the application are started in the correct order.
+
+- The GraphQL schema is defined in the `schema.js` module. It describes the structure of the API—for example, which queries and mutations are possible through the API and defines object fields.
+
+- Application logic is defined in the `resolvers.js` module. Its responsibility is to define behavior for different queries, where the data is fetched, and how it is processed.
+
+- `server.js` configures and starts the Apollo Server.

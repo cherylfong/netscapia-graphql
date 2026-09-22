@@ -46,6 +46,9 @@ const typeDefs = /* GraphQL */ `
     # user related mutation
     createUser(username: String!): User
     login(username: String!, password: String!): Token
+
+    # add person to a user's friend array
+    addAsFriend(name: String!): User
   }
 `
 

@@ -58,7 +58,17 @@ const resolvers = {
   },
 
   Mutation: {
-    addPerson: async (root, args) => {
+    addPerson: async (parent, args, context, info) => {
+      const currentUser = context.currentUser
+
+      // must be authenticated to add person
+      if (!currentUser) {
+        throw new GraphQLError('not authenticated', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+          },
+        })
+      }
       const nameExists = await Person.exists({ name: args.name })
 
       if (nameExists) {
@@ -74,6 +84,9 @@ const resolvers = {
 
       try {
         await person.save()
+        // add person to logged in user's friend array
+        currentUser.friends = currentUser.friends.concat(person)
+        await currentUser.save()
       } catch (error) {
         throw new GraphQLError(`Saving person failed: ${error.message}`, {
           extensions: {
@@ -141,6 +154,38 @@ const resolvers = {
       }
 
       return { token: jwt.sign(userForToken, process.env.JWT_SECRET) }
+    },
+
+    addAsFriend: async (root, args, { currentUser }) => {
+      if (!currentUser) {
+        throw new GraphQLError('not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        })
+      }
+
+      const nonFriendAlready = (person) =>
+        !currentUser.friends
+          .map((f) => f._id.toString())
+          .includes(person._id.toString())
+
+      const person = await Person.findOne({ name: args.name })
+
+      if (!person) {
+        throw new GraphQLError("The name didn't found", {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.name,
+          },
+        })
+      }
+
+      if (nonFriendAlready(person)) {
+        currentUser.friends = currentUser.friends.concat(person)
+      }
+
+      await currentUser.save()
+
+      return currentUser
     },
   },
 }

@@ -85,3 +85,19 @@ Organization structure of the Server application directory and files:
 - Application logic is defined in the `resolvers.js` module. Its responsibility is to define behavior for different queries, where the data is fetched, and how it is processed.
 
 - `server.js` configures and starts the Apollo Server.
+
+#### Mongoose and Apollo
+
+Database setup with mongoose.
+
+```bash
+npm install mongoose
+```
+
+Define `MONGODB_URI` and `PORT` enviroment variables in `.env` file. Instructions can be found on this [page](https://fullstackopen.com/en/part3/saving_data_to_mongo_db#defining-environment-variables-using-the-dotenv-library).
+
+In reference to `resolvers,js`:
+
+- Mongodb's identifying field for an object is called `_id`, it necessary to parse the name of the field to `id` ourselves. However, GraphQL can do this automatically.
+
+- Resolver functions now return a promise, when they previously returned normal objects (prior to the refactor when mongoose is applied). When a resolver returns a promise, Apollo server [sends back](https://www.apollographql.com/docs/apollo-server/data/resolvers#return-values) the value the promise resolves to.

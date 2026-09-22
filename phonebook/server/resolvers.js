@@ -28,13 +28,13 @@ const Person = require('./models/person')
 const resolvers = {
   Query: {
     personCount: async () => Person.collection.countDocuments(),
-   allPersons: async (root, args) => {
-    if (!args.phone) {
-      return Person.find({})
-    }
+    allPersons: async (root, args) => {
+      if (!args.phone) {
+        return Person.find({})
+      }
 
-    return Person.find({ phone: { $exists: args.phone === 'YES' } })
-  },
+      return Person.find({ phone: { $exists: args.phone === 'YES' } })
+    },
     findPerson: async (root, args) => Person.findOne({ name: args.name }),
   },
 
@@ -50,7 +50,7 @@ const resolvers = {
     },
   },
 
-   Mutation: {
+  Mutation: {
     addPerson: async (root, args) => {
       const nameExists = await Person.exists({ name: args.name })
 
@@ -64,7 +64,20 @@ const resolvers = {
       }
 
       const person = new Person({ ...args })
-      return person.save()
+
+      try {
+        await person.save()
+      } catch (error) {
+        throw new GraphQLError(`Saving person failed: ${error.message}`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.name,
+            error,
+          },
+        })
+      }
+
+      return person
     },
     editNumber: async (root, args) => {
       const person = await Person.findOne({ name: args.name })
@@ -74,7 +87,20 @@ const resolvers = {
       }
 
       person.phone = args.phone
-      return person.save()
+
+      try {
+        await person.save()
+      } catch (error) {
+        throw new GraphQLError(`Saving number failed: ${error.message}`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.name,
+            error,
+          },
+        })
+      }
+
+      return person
     },
   },
 }

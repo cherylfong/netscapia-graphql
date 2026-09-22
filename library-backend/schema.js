@@ -1,4 +1,3 @@
-
 const typeDefs = /* GraphQL */ `
   type Author {
     name: String!

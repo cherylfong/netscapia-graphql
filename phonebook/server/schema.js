@@ -3,7 +3,6 @@ const typeDefs = /* GraphQL */ `
     street: String!
     city: String!
   }
-
   type Person {
     name: String!
     phone: String
@@ -11,10 +10,18 @@ const typeDefs = /* GraphQL */ `
     city: String!
     id: ID!
   }
-
   enum YesNo {
     YES
     NO
+  }
+
+  type User {
+    username: String!
+    friends: [Person!]!
+    id: ID!
+  }
+  type Token {
+    token: String!
   }
 
   type Query {
@@ -23,6 +30,8 @@ const typeDefs = /* GraphQL */ `
     allPersons(phone: YesNo): [Person!]!
 
     findPerson(name: String!): Person
+
+    me: User
   }
 
   type Mutation {
@@ -33,6 +42,10 @@ const typeDefs = /* GraphQL */ `
       city: String!
     ): Person
     editNumber(name: String!, phone: String!): Person
+
+    # user related mutation
+    createUser(username: String!): User
+    login(username: String!, password: String!): Token
   }
 `
 

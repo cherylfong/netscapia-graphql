@@ -2,6 +2,9 @@ const { v4: uuidv4 } = require('uuid')
 const { GraphQLError } = require('graphql')
 const Person = require('./models/person')
 
+const jwt = require('jsonwebtoken')
+const User = require('./models/user')
+
 // let persons = [
 //   {
 //     name: 'Arto Hellas',
@@ -36,6 +39,10 @@ const resolvers = {
       return Person.find({ phone: { $exists: args.phone === 'YES' } })
     },
     findPerson: async (root, args) => Person.findOne({ name: args.name }),
+    // context is given in server.js
+    me: (root, args, context) => {
+      return context.currentUser
+    },
   },
 
   // self-defined resolver
@@ -101,6 +108,39 @@ const resolvers = {
       }
 
       return person
+    },
+
+    createUser: async (root, args) => {
+      const user = new User({ username: args.username })
+
+      return user.save().catch((error) => {
+        throw new GraphQLError(`Creating the user failed: ${error.message}`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.username,
+            error,
+          },
+        })
+      })
+    },
+    login: async (root, args) => {
+      const user = await User.findOne({ username: args.username })
+
+      // password is HARDCODED !!
+      if (!user || args.password !== 'secret') {
+        throw new GraphQLError('wrong credentials', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          },
+        })
+      }
+
+      const userForToken = {
+        username: user.username,
+        id: user._id,
+      }
+
+      return { token: jwt.sign(userForToken, process.env.JWT_SECRET) }
     },
   },
 }

@@ -104,7 +104,7 @@ In reference to `resolvers,js`:
 
 #### JWT Token Passing Using Apollo Server Context
 
-The most convenient way to pass the token that arrives with the request to the resolvers is to use Apollo Server’s [context](https://www.apollographql.com/docs/apollo-server/data/context/). 
+The most convenient way to pass the token that arrives with the request to the resolvers is to use Apollo Server’s [context](https://www.apollographql.com/docs/apollo-server/data/context/).
 
 With the context, we can perform things that are common to all queries and mutations, for example [identifying the user](https://www.apollographql.com/blog/authorization-in-graphql/) associated with the request.
 
@@ -112,4 +112,3 @@ See [`server.js`](phonebook/server/server.js) to understand how the JWT token is
 
 Below is an image that shows passing the JWT Bearer token via the Apollo Client:
 ![An example of how to pass the JWT Bearer token using Apollo Client](attachments/image.png)
-

@@ -1,3 +1,18 @@
+require('dotenv').config()
+
+const connectToDatabase = require('./db')
+const startServer = require('./server')
+
+const MONGODB_URI = process.env.MONGODB_URI
+const PORT = process.env.PORT || 4000
+
+const main = async () => {
+  await connectToDatabase(MONGODB_URI)
+  startServer(PORT)
+}
+
+main()
+
 // let authors = [
 //   {
 //     name: 'Robert Martin',
@@ -23,7 +38,6 @@
 //     id: 'afa5b6f3-344d-11e9-a414-719c6709cf3e',
 //   },
 // ]
-
 
 // let books = [
 //   {
@@ -76,11 +90,3 @@
 //     genres: ['classic', 'revolution'],
 //   },
 // ]
-
-require('dotenv').config()
-
-const startServer = require('./server')
-
-const PORT = process.env.PORT || 4000
-
-startServer(PORT)

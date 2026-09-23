@@ -4,15 +4,11 @@ const Book = require('./models/book')
 
 const { GraphQLError } = require('graphql')
 
-const countBooksByAuthor = (authorId) =>
-  Book.countDocuments({ author: authorId }).exec()
-//   books.filter((book) => book.author === authorName).length
-
 const resolvers = {
   Query: {
     authorCount: async () => Author.collection.countDocuments(),
 
-    allAuthors: async (root, args) => Author.find({}).exec(),
+    allAuthors: async () => Author.find({}).exec(),
 
     bookCount: async (root, args) => {
       if (!args.name) {
@@ -21,13 +17,25 @@ const resolvers = {
 
       const author = await Author.findOne({ name: args.name }).exec()
 
-      return author ? countBooksByAuthor(author._id) : 0
+      return author ? Book.countDocuments({ author: author._id }).exec() : 0
     },
 
-    allBooks: async (root, { author, genre }) => {
+    allBooks: async (root, args) => {
       const filter = {}
+      const author = args.author
+      const genre = args.genre
 
-      if (author) filter.author = author
+      if (author) {
+        if (!(await Author.exists({ name: author }))) {
+          throw new GraphQLError(`Author "${author}" does not exist.`, {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.title,
+            },
+          })
+        }
+        filter.author = author
+      }
       if (genre) filter.genres = { $all: [genre] }
 
       // it is necessary to populate the field 'author' in the Book schema!
@@ -50,10 +58,49 @@ const resolvers = {
 
   Mutation: {
     addBook: async (root, args) => {
+      if (await Book.exists({ title: args.title })) {
+        throw new GraphQLError('Book Title needs to be unique!', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.title,
+          },
+        })
+      }
+
+      if (args.title.length < 6) {
+        throw new GraphQLError('Book title at least 5 characters long', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.title,
+          },
+        })
+      }
+
+      if (args.author.length < 5) {
+        throw new GraphQLError('Author name needs at least 4 characters long', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.title,
+          },
+        })
+      }
+
       let author = await Author.findOne({ name: args.author })
 
       if (!author) {
-        author = await new Author({ name: args.author }).save()
+        author = new Author({ name: args.author })
+
+        try {
+          await author.save()
+        } catch (error) {
+          throw new GraphQLError(`Saving AUTHOR failed: ${error.message}`, {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.title,
+              error,
+            },
+          })
+        }
       }
 
       const book = new Book({
@@ -81,6 +128,12 @@ const resolvers = {
     editAuthor: async (root, args) => {
       const author = await Author.findOne({ name: args.name })
       if (!author) {
+        throw new GraphQLError('Author does not exist', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.title,
+          },
+        })
         return null
       }
       author.born = args?.setBornTo

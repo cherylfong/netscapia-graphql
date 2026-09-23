@@ -126,3 +126,31 @@ Below is an image that shows passing the JWT Bearer token via the Apollo Client:
     // But .exec() makes the query execution explicit and     returns a standard promise.
     Book.find(filter).populate('author').exec()
 ```
+
+## Chapter 5 | Login and Updating Apollo Cache
+
+### User Login and Logout
+
+Resetting the cache is done using the Apollo client object’s [resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient#resetstore)  method, 
+
+The client can be accessed with the [useApolloClient](https://www.apollographql.com/docs/react/api/react/useApolloClient) hook.
+
+For example,
+
+```javascript
+import { useApolloClient, useQuery } from '@apollo/client/react'
+
+//...
+
+const client = useApolloClient()
+
+//...
+
+const onLogout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+  }
+```
+
+> Clearing the cache is important, because some queries may have fetched data into the cache that only an authenticated user is allowed to access.

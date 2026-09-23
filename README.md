@@ -4,13 +4,15 @@ This is [part 8 of the fullstack open course](https://fullstackopen.com/en/part8
 
 ### Github Actions Test Status
 
-<!-- Branches ... do not have triggered tests through GitHub workflow actions. -->
+Branches `chapter-2` and `chapter-3` do not have triggered tests through GitHub workflow actions. There is no `chapter-1` branch.
 
-<!-- <details>
-<summary>...</summary>
+<details>
+<summary> chapter-4 </summary>
+
+[![Test library-backend](https://github.com/cherylfong/netscapia-graphql/actions/workflows/test-chapter4.yml/badge.svg?branch=chapter-4)](https://github.com/cherylfong/netscapia-graphql/actions/workflows/test-chapter4.yml)
 
 </details>
-<br/> -->
+<br/>
 
 ## Chapter 2 | GraphQL Server
 

@@ -4,6 +4,9 @@ const Book = require('./models/book')
 
 const { GraphQLError } = require('graphql')
 
+const jwt = require('jsonwebtoken')
+const User = require('./models/user')
+
 const resolvers = {
   Query: {
     authorCount: async () => Author.collection.countDocuments(),
@@ -48,16 +51,30 @@ const resolvers = {
       // But .exec() makes the query execution explicit and returns a standard promise.
       return Book.find(filter).populate('author').exec()
     },
+
+    me: (root, args, context) => {
+      return context.currentUser
+    },
   },
 
   // self-defined resolver
   Author: {
     // receives parent author object as param
-    bookCount: (author) => countBooksByAuthor(author._id),
+    bookCount: (author) => Book.countDocuments({ author: author._id }).exec(),
   },
 
   Mutation: {
-    addBook: async (root, args) => {
+    addBook: async (root, args, context) => {
+      const currentUser = context.currentUser
+
+      if (!currentUser) {
+        throw new GraphQLError('not authenticated', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+          },
+        })
+      }
+
       if (await Book.exists({ title: args.title })) {
         throw new GraphQLError('Book Title needs to be unique!', {
           extensions: {
@@ -125,7 +142,17 @@ const resolvers = {
 
       return book
     },
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, context) => {
+      const currentUser = context.currentUser
+
+      if (!currentUser) {
+        throw new GraphQLError('not authenticated', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+          },
+        })
+      }
+
       const author = await Author.findOne({ name: args.name })
       if (!author) {
         throw new GraphQLError('Author does not exist', {
@@ -151,7 +178,39 @@ const resolvers = {
       }
       return author
     },
-  },
+
+    createUser: async (root, args) => {
+      const user = new User({ ...args })
+
+      return user.save().catch((error) => {
+        throw new GraphQLError(`Creating the user failed: ${error.message}`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.username,
+            error,
+          },
+        })
+      })
+    },
+    login: async (root, args) => {
+      const user = await User.findOne({ username: args.username })
+
+      if (!user || args.password !== 'secret') {
+        throw new GraphQLError('wrong credentials', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          },
+        })
+      }
+
+      const userForToken = {
+        username: user.username,
+        id: user._id,
+      }
+
+      return { value: jwt.sign(userForToken, process.env.JWT_SECRET) }
+    },
+  }, // mutation ending bracket
 }
 
 module.exports = resolvers

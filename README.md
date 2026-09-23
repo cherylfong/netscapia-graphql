@@ -112,3 +112,15 @@ See [`server.js`](phonebook/server/server.js) to understand how the JWT token is
 
 Below is an image that shows passing the JWT Bearer token via the Apollo Client:
 ![An example of how to pass the JWT Bearer token using Apollo Client](attachments/image.png)
+
+#### Recap on Mongoose Usage
+
+```javascript
+    // .exec() means: “Run this Mongoose query.”
+    // await means: “Pause here until the promise finishes.”
+    // Mongoose queries are thenable, so this often also works:
+    const books = await Book.find({})
+
+    // But .exec() makes the query execution explicit and     returns a standard promise.
+    Book.find(filter).populate('author').exec()
+```

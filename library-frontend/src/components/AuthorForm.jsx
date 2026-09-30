@@ -2,17 +2,21 @@ import { useState } from 'react'
 import { useMutation } from '@apollo/client/react'
 import { ALL_BOOKS, ALL_AUTHORS, CHANGE_BIRTH } from '../queries'
 
-const AuthorForm = ({ authors }) => {
+const AuthorForm = ({ authors, setError }) => {
   const [name, setName] = useState('')
   const [year, setYear] = useState('')
 
   const [editAuthor] = useMutation(CHANGE_BIRTH, {
     refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
     onCompleted: (data) => {
-      if (!data.editNumber) {
+      if (!data.editAuthor) {
         console.log('author not found')
       }
+      setError(
+        `updated "${data.editAuthor.name}" to year ${data.editAuthor.born}`,
+      )
     },
+    onError: (error) => setError(error.message),
   })
 
   const submit = async (event) => {
@@ -20,7 +24,7 @@ const AuthorForm = ({ authors }) => {
 
     const yearInteger = Number(year)
 
-    if (year.trim() === '' || !Number.isInteger(yearInteger)) {
+    if (name === '' || year.trim() === '' || !Number.isInteger(yearInteger)) {
       return
     }
 
@@ -43,8 +47,13 @@ const AuthorForm = ({ authors }) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
           >
+            <option value="" disabled>
+              select author
+            </option>
             {authors.map((a) => (
-              <option value={a.name}>{a.name}</option>
+              <option key={a.id} value={a.name}>
+                {a.name}
+              </option>
             ))}
           </select>
         </div>

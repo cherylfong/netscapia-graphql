@@ -11,6 +11,11 @@ const NewBook = (props) => {
 
   const [addBook] = useMutation(ADD_BOOK, {
     refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
+    onCompleted: (data) =>
+      props.setError(
+        `added "${data.addBook.title}" by ${data.addBook.author.name}`,
+      ),
+    onError: (error) => props.setError(error.message),
   })
 
   if (!props.show) {

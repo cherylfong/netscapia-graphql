@@ -66,9 +66,9 @@ const App = () => {
           <button onClick={() => setPage('login')}>login</button>
         )}
       </div>
-      <Authors authors={result.data.allAuthors} show={page === 'authors'} />
+      <Authors authors={result.data.allAuthors} show={page === 'authors'} setError={notify} />
       <Books show={page === 'books'} books={books.data?.allBooks ?? []} />
-      <NewBook show={page === 'add'} />
+      <NewBook show={page === 'add'} setError={notify} />
 
       {!token && page === 'login' && (
         <LoginForm setToken={setToken} setError={notify} />

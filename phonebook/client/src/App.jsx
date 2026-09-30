@@ -16,9 +16,8 @@ const App = () => {
   const result = useQuery(ALL_PERSONS)
   const client = useApolloClient()
 
-  if (result.loading) {
-    return <div>loading...</div>
-  }
+  if (result.loading) return <div>loading...</div>
+  if (result.error) return <div>error: {result.error.message}</div>
 
   const onLogout = () => {
     setToken(null)

@@ -8,7 +8,7 @@ const LoginForm = ({ setError, setToken }) => {
 
   const [ login ] = useMutation(LOGIN, {
     onCompleted: (data) => {
-      const token = data.login.value
+      const token = data.login.token
       setToken(token)
       localStorage.setItem('phonebook-user-token', token)
     },

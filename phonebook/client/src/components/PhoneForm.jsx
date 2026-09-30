@@ -2,22 +2,27 @@ import { useState } from 'react'
 import { useMutation } from '@apollo/client/react'
 import { EDIT_NUMBER } from '../queries'
 
-const PhoneForm = ({setError}) => {
+const PhoneForm = ({ setError }) => {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
 
-   const [changeNumber] = useMutation(EDIT_NUMBER, {
+  const [changeNumber] = useMutation(EDIT_NUMBER, {
     onCompleted: (data) => {
       if (!data.editNumber) {
         setError('person not found')
       }
-    }
+    },
   })
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault()
 
-    changeNumber({ variables: { name, phone } })
+    try {
+      await changeNumber({ variables: { name, phone } })
+    } catch (error) {
+      // prints error if updated phone number is less than 5 characters
+      setError(error.message)
+    }
 
     setName('')
     setPhone('')
@@ -29,18 +34,20 @@ const PhoneForm = ({setError}) => {
 
       <form onSubmit={submit}>
         <div>
-          name <input
+          name{' '}
+          <input
             value={name}
             onChange={({ target }) => setName(target.value)}
           />
         </div>
         <div>
-          phone <input
+          phone{' '}
+          <input
             value={phone}
             onChange={({ target }) => setPhone(target.value)}
           />
         </div>
-        <button type='submit'>change number</button>
+        <button type="submit">change number</button>
       </form>
     </div>
   )

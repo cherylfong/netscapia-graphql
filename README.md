@@ -208,8 +208,18 @@ Versus
 
 A prop only has an effect if the component reads it. LoginForm receives show, but its signature is:
 
-```javascript 
+```javascript
 const LoginForm = ({ setError, setToken }) => {
 ```
 
 It never uses `show`, so `// version 1` always renders its form. The only thing that hides it is the `!token &&` in App, and that only depends on whether you're logged in.
+
+Unless, within the `LoginForm`, there was logic that returned `null` when `show` is false>
+
+```javascript
+if (!show) {
+    return null
+  }
+
+// see Authors.jsx
+```

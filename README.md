@@ -154,3 +154,13 @@ const onLogout = () => {
 ```
 
 > Clearing the cache is important, because some queries may have fetched data into the cache that only an authenticated user is allowed to access.
+
+### Updating the Cache
+
+In some situations, the only sensible way to keep the cache up to date is using the `update` callback.
+
+When necessary, it is possible to disable cache for the whole application or [single queries](https://www.apollographql.com/docs/react/api/react/hooks/#options) by setting the field managing the use of cache, [fetchPolicy](https://www.apollographql.com/docs/react/data/queries#setting-a-fetch-policy) as `no-cache`.
+
+> Be diligent with the cache.
+>
+> Old data in the cache can cause hard-to-find bugs.

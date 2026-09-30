@@ -49,19 +49,20 @@ export const ADD_BOOK = gql`
   }
 `
 
-export const CHANGE_BIRTH = gql `
+export const CHANGE_BIRTH = gql`
+  mutation editAuthor($name: String!, $setBornTo: Int!) {
+    editAuthor(name: $name, setBornTo: $setBornTo) {
+      name
+      born
+      id
+    }
+  }
+`
 
-  mutation editAuthor(
-    $name: String!
-    $setBornTo: Int!
-  ){
-    editAuthor(
-        name: $name
-        setBornTo: $setBornTo
-    ){
-        name
-        born
-        id
+export const LOGIN = gql`
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      value
     }
   }
 `

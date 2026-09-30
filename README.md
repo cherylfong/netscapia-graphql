@@ -164,3 +164,23 @@ When necessary, it is possible to disable cache for the whole application or [si
 > Be diligent with the cache.
 >
 > Old data in the cache can cause hard-to-find bugs.
+
+### Issues when Returning a Whole Object with GraphQL
+
+GraphQL has no way to say "give me the whole object." **That's a deliberate part of the spec (the "leaf field selections" validation rule),** not a limitation of Apollo.
+
+The rule:
+
+> Every field in a query must end at a scalar (String, Int, ID, etc.) or an enum.
+
+It is necessary to have to keep selecting inside it until you reach scalars. The server checks this before running any resolvers, which is why you got a validation error rather than a runtime one.
+
+#### Why is the Rule Designed this Way?
+
+The response shape matches the query. When you read a query, you know exactly what JSON will come back. Apollo's cache and tools like `codegen` rely on this.
+
+> Objects can be infinitely deep. Requiring explicit selections means the client always says where to stop.
+
+**Some fields are expensive. The server only does the work the client asked for. That avoids over-fetching, one of the main reasons GraphQL exists as an alternative to REST.**
+
+Adding fields is safe. If the server later adds a field to Author (say, a large biography), existing queries don't suddenly start receiving it. Clients only get what they asked for, so the schema can grow without breaking or slowing down existing clients.

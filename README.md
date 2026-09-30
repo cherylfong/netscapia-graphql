@@ -184,3 +184,32 @@ The response shape matches the query. When you read a query, you know exactly wh
 **Some fields are expensive. The server only does the work the client asked for. That avoids over-fetching, one of the main reasons GraphQL exists as an alternative to REST.**
 
 Adding fields is safe. If the server later adds a field to Author (say, a large biography), existing queries don't suddenly start receiving it. Clients only get what they asked for, so the schema can grow without breaking or slowing down existing clients.
+
+### Chapter 5 Note to Self
+
+```javascript
+// version 1
+{!token && (
+        <LoginForm
+          show={page === 'login'}
+          setToken={setToken}
+          setError={notify}
+        />
+      )}
+```
+
+Versus
+
+```javascript
+{!token && page === 'login' && (
+  <LoginForm setToken={setToken} setError={notify} />
+)}
+```
+
+A prop only has an effect if the component reads it. LoginForm receives show, but its signature is:
+
+```javascript 
+const LoginForm = ({ setError, setToken }) => {
+```
+
+It never uses `show`, so `// version 1` always renders its form. The only thing that hides it is the `!token &&` in App, and that only depends on whether you're logged in.

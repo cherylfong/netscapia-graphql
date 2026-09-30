@@ -1,14 +1,14 @@
-const Books = ({show, books}) => {
+const Books = ({ show, books }) => {
   if (!show) {
     return null
   }
 
   console.log(books)
-  
+
   return (
     <div>
       <h2>books</h2>
-
+      <pre>Number of books: {books.length}</pre>
       <table>
         <tbody>
           <tr>

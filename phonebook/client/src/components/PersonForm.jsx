@@ -9,7 +9,16 @@ const PersonForm = ({ setError }) => {
   const [city, setCity] = useState('')
 
   const [createPerson] = useMutation(CREATE_PERSON, {
-    refetchQueries: [{ query: ALL_PERSONS }],
+    // query rerun even without new updates
+    // refetchQueries: [{ query: ALL_PERSONS }],
+    // manual cache update
+     update: (cache, response) => {
+      cache.updateQuery({ query: ALL_PERSONS }, ({ allPersons }) => {
+        return {
+          allPersons: allPersons.concat(response.data.addPerson),
+        }
+      })
+    },
     onError: (error) => setError(error.message),
   })
 

@@ -8,11 +8,13 @@ import Notify from './components/Notify'
 import { ALL_AUTHORS, ALL_BOOKS } from './queries'
 import { useApolloClient } from '@apollo/client/react'
 
+import {useNotification} from './NotificationContext'
+
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem('library-user-token'))
   const [page, setPage] = useState('authors')
 
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { notify } = useNotification()
 
   const result = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
@@ -40,20 +42,13 @@ const App = () => {
     setToken(null)
     localStorage.clear()
     client.resetStore()
-    setErrorMessage('User Logged OUT!')
-  }
-
-  const notify = (message) => {
-    setErrorMessage(message)
-    setTimeout(() => {
-      setErrorMessage(null)
-    }, 10000)
+    notify('User Logged OUT!')
   }
 
   return (
     <div>
       <div>
-        <Notify errorMessage={errorMessage} />
+        <Notify />
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
         <button onClick={() => setPage('add')}>add book</button>
@@ -71,7 +66,7 @@ const App = () => {
       <NewBook show={page === 'add'} setError={notify} />
 
       {!token && page === 'login' && (
-        <LoginForm setToken={setToken} setError={notify} />
+        <LoginForm setToken={setToken} />
       )}
     </div>
   )

@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useMutation } from '@apollo/client/react'
 import { ALL_BOOKS, ALL_AUTHORS, CHANGE_BIRTH } from '../queries'
+import { useNotification } from '../NotificationContext'
 
-const AuthorForm = ({ authors, setError }) => {
+const AuthorForm = ({ authors }) => {
   const [name, setName] = useState('')
   const [year, setYear] = useState('')
+  const { notify } = useNotification()
 
   const [editAuthor] = useMutation(CHANGE_BIRTH, {
     refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
@@ -12,11 +14,11 @@ const AuthorForm = ({ authors, setError }) => {
       if (!data.editAuthor) {
         console.log('author not found')
       }
-      setError(
+      notify(
         `updated "${data.editAuthor.name}" to year ${data.editAuthor.born}`,
       )
     },
-    onError: (error) => setError(error.message),
+    onError: (error) => notify(error.message),
   })
 
   const submit = async (event) => {

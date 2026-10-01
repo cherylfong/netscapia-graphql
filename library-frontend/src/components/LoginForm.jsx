@@ -2,7 +2,10 @@ import { useState } from 'react'
 import { useMutation } from '@apollo/client/react'
 import { LOGIN } from '../queries'
 
-const LoginForm = ({ setError, setToken }) => {
+import { useNotification } from '../NotificationContext'
+
+const LoginForm = ({ setToken }) => {
+  const { notify } = useNotification()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
@@ -11,10 +14,10 @@ const LoginForm = ({ setError, setToken }) => {
       const token = data.login.value
       setToken(token)
       localStorage.setItem('library-user-token', token)
-      setError('User Logged in!')
+      notify('User Logged in!')
     },
     onError: (error) => {
-      setError(error.message)
+      notify(error.message)
     },
   })
 

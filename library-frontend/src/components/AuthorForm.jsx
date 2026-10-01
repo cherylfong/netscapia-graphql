@@ -43,12 +43,12 @@ const AuthorForm = ({ authors, show }) => {
 
   return (
     <div>
-      <h2>Set Author Birth Year</h2>
+      <h2>Set birthyear</h2>
       <form onSubmit={submit}>
         <div>
           name
           <select
-            name="select-author"
+            name="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
           >
@@ -64,15 +64,17 @@ const AuthorForm = ({ authors, show }) => {
         </div>
 
         <div>
+          <label>
           born
           <input
             type="number"
             value={year}
             onChange={({ target }) => setYear(target.value)}
           />
+          </label>
         </div>
 
-        <button type="submit">submit</button>
+        <button type="submit">update author</button>
       </form>
     </div>
   )

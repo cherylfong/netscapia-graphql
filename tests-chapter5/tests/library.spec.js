@@ -97,7 +97,7 @@ describe('Library app', () => {
     })
 
     test('author birth year can be updated', async ({ page }) => {
-      await page.getByRole('button', { name: 'authors' }).click()
+      await page.getByRole('button', { name: 'set author birth year' }).click()
       await expect(
         page.getByRole('heading', { name: 'Set birthyear' }),
       ).toBeVisible()
@@ -105,6 +105,8 @@ describe('Library app', () => {
       await page.locator('select[name="name"]').selectOption('Martin Fowler')
       await page.getByLabel('born').fill('1965')
       await page.getByRole('button', { name: 'update author' }).click()
+
+      await page.getByRole('button', { name: 'authors' }).click()
 
       const fowlerRow = page.locator('tr', { hasText: 'Martin Fowler' })
       await expect(fowlerRow.getByText('1965')).toBeVisible()

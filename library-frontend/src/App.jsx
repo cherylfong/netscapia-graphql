@@ -60,8 +60,10 @@ const App = () => {
         <Notify />
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
-        <button onClick={() => setPage('add')}>add book</button>
-        <button onClick={() => setPage('recommend')}>recommend</button>
+        {token && <button onClick={() => setPage('add')}>add book</button>}
+        {token && (
+          <button onClick={() => setPage('recommend')}>recommend</button>
+        )}
         <button onClick={() => setPage('edit-authors')}>
           set author birth year
         </button>
@@ -76,10 +78,13 @@ const App = () => {
         show={page === 'authors'}
         setError={notify}
       />
-      <Books show={page === 'books'} books={books.data?.allBooks ?? []} />
-      <NewBook show={page === 'add'} setError={notify} />
-      <Recommendations show={page === 'recommend'} user={user.data?.me} />
 
+      <Books show={page === 'books'} books={books.data?.allBooks ?? []} />
+
+      {token && <NewBook show={page === 'add'} setError={notify} />}
+      {token && (
+        <Recommendations show={page === 'recommend'} user={user.data?.me} />
+      )}
       <AuthorForm
         show={page === 'edit-authors'}
         authors={result.data.allAuthors}

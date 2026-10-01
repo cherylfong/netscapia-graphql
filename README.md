@@ -1,3 +1,5 @@
+## About
+
 This is [part 8 of the fullstack open course](https://fullstackopen.com/en/part8) by <https://studies.cs.helsinki.fi>
 
 [New Course Platform for GraphQL]( https://courses.mooc.fi/org/uh-cs/courses/full-stack-open-graphql )
@@ -13,6 +15,13 @@ Branches `chapter-2` and `chapter-3` do not have triggered tests through GitHub 
 
 </details>
 <br/>
+
+<details>
+<summary> chapter-5 </summary>
+
+
+[![E2E tests (library)](https://github.com/cherylfong/netscapia-graphql/actions/workflows/test-chapter5.yml/badge.svg?branch=chapter-5)](https://github.com/cherylfong/netscapia-graphql/actions/workflows/test-chapter5.yml)
+</details>
 
 ## Chapter 2 | GraphQL Server
 

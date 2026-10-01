@@ -5,6 +5,7 @@ import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 import Notify from './components/Notify'
+import AuthorForm from './components/AuthorForm'
 import Recommendations from './components/Recommendations'
 import { ALL_AUTHORS, ALL_BOOKS, USER_INFO } from './queries'
 import { useApolloClient } from '@apollo/client/react'
@@ -19,7 +20,7 @@ const App = () => {
 
   const result = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
-  
+
   // make query depend on token field
   // if token is null then skip the query
   // so user never gets null
@@ -61,7 +62,7 @@ const App = () => {
         <button onClick={() => setPage('books')}>books</button>
         <button onClick={() => setPage('add')}>add book</button>
         <button onClick={() => setPage('recommend')}>recommend</button>
-        <button onClick={() => setPage('authors')}>
+        <button onClick={() => setPage('edit-authors')}>
           set author birth year
         </button>
         {token ? (
@@ -78,6 +79,12 @@ const App = () => {
       <Books show={page === 'books'} books={books.data?.allBooks ?? []} />
       <NewBook show={page === 'add'} setError={notify} />
       <Recommendations show={page === 'recommend'} user={user.data?.me} />
+
+      <AuthorForm
+        show={page === 'edit-authors'}
+        authors={result.data.allAuthors}
+        setError={notify}
+      />
 
       {!token && page === 'login' && <LoginForm setToken={setToken} />}
     </div>

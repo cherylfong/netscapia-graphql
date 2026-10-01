@@ -3,7 +3,7 @@ import { useMutation } from '@apollo/client/react'
 import { ALL_BOOKS, ALL_AUTHORS, CHANGE_BIRTH } from '../queries'
 import { useNotification } from '../NotificationContext'
 
-const AuthorForm = ({ authors }) => {
+const AuthorForm = ({ authors, show }) => {
   const [name, setName] = useState('')
   const [year, setYear] = useState('')
   const { notify } = useNotification()
@@ -21,6 +21,9 @@ const AuthorForm = ({ authors }) => {
     onError: (error) => notify(error.message),
   })
 
+  if (!show) {
+    return null
+  }
   const submit = async (event) => {
     event.preventDefault()
 

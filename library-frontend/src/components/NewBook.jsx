@@ -3,7 +3,6 @@ import { useMutation } from '@apollo/client/react'
 import { ALL_BOOKS, ADD_BOOK, ALL_AUTHORS } from '../queries'
 import { useNotification } from '../NotificationContext'
 
-
 const NewBook = (props) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
@@ -14,10 +13,7 @@ const NewBook = (props) => {
 
   const [addBook] = useMutation(ADD_BOOK, {
     refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
-    onCompleted: (data) =>
-      notify(
-        `added "${data.addBook.title}" by ${data.addBook.author.name}`,
-      ),
+    onCompleted: () => notify('book added'),
     onError: (error) => notify(error.message),
   })
 
@@ -57,32 +53,41 @@ const NewBook = (props) => {
       <h2>Add Book</h2>
       <form onSubmit={submit}>
         <div>
-          title
-          <input
-            value={title}
-            onChange={({ target }) => setTitle(target.value)}
-          />
+          <label>
+            title
+            <input
+              value={title}
+              onChange={({ target }) => setTitle(target.value)}
+            />
+          </label>
         </div>
         <div>
-          author
-          <input
-            value={author}
-            onChange={({ target }) => setAuthor(target.value)}
-          />
+          <label>
+            author
+            <input
+              value={author}
+              onChange={({ target }) => setAuthor(target.value)}
+            />
+          </label>
         </div>
         <div>
-          published
-          <input
-            type="number"
-            value={published}
-            onChange={({ target }) => setPublished(target.value)}
-          />
+          <label>
+            published
+            <input
+              type="number"
+              value={published}
+              onChange={({ target }) => setPublished(target.value)}
+            />
+          </label>
         </div>
         <div>
-          <input
-            value={genre}
-            onChange={({ target }) => setGenre(target.value)}
-          />
+          <label>
+            genre
+            <input
+              value={genre}
+              onChange={({ target }) => setGenre(target.value)}
+            />
+          </label>
           <button onClick={addGenre} type="button">
             add genre
           </button>

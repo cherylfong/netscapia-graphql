@@ -232,3 +232,33 @@ if (!show) {
 
 // see Authors.jsx
 ```
+
+## Chapter 6 | Fragments and Subscriptions
+
+### Fragments
+
+[Fragments](https://graphql.org/learn/queries/#fragments) can help remove redundant code specified in the frontend application's query definitions.
+
+The fragments are not defined in the GraphQL schema.
+
+### Subscriptions
+
+[Subscriptions](https://www.apollographql.com/docs/react/data/subscriptions/) allow frontend applications to subscribe to changes in the server.
+
+Without subscriptions, changes to the server and then applied to the frontend relied HTTP requests. GraphQL queries and mutations have also been done this way.
+
+GraphQL subscriptions broadcasts changes to all subscribers.
+
+> Apollo uses [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) for server subscriber communication.
+
+**Starting from version 3.0, Apollo Server no longer provides direct support for subscriptions.**
+
+[`startStandaloneServer`](https://www.apollographql.com/docs/apollo-server/api/standalone/#startstandaloneserver) does not allow adding subscriptions to the application. Thus cannot be used.
+
+It can be replaced with the[expressMiddleware](https://www.apollographql.com/docs/apollo-server/api/express-middleware/) function.
+
+Install with:
+
+```bash
+npm install express cors @as-integrations/express5
+```

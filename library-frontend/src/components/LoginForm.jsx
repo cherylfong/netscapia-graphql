@@ -12,8 +12,8 @@ const LoginForm = ({ setToken }) => {
   const [login] = useMutation(LOGIN, {
     onCompleted: (data) => {
       const token = data.login.value
-      setToken(token)
       localStorage.setItem('library-user-token', token)
+      setToken(token)
       notify('User Logged in!')
     },
     onError: (error) => {

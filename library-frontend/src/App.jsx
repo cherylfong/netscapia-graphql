@@ -9,7 +9,7 @@ import Recommendations from './components/Recommendations'
 import { ALL_AUTHORS, ALL_BOOKS, USER_INFO } from './queries'
 import { useApolloClient } from '@apollo/client/react'
 
-import {useNotification} from './NotificationContext'
+import { useNotification } from './NotificationContext'
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem('library-user-token'))
@@ -19,7 +19,11 @@ const App = () => {
 
   const result = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
-  const user = useQuery(USER_INFO)
+  
+  // make query depend on token field
+  // if token is null then skip the query
+  // so user never gets null
+  const user = useQuery(USER_INFO, { skip: !token })
 
   const client = useApolloClient()
 
@@ -66,14 +70,16 @@ const App = () => {
           <button onClick={() => setPage('login')}>login</button>
         )}
       </div>
-      <Authors authors={result.data.allAuthors} show={page === 'authors'} setError={notify} />
+      <Authors
+        authors={result.data.allAuthors}
+        show={page === 'authors'}
+        setError={notify}
+      />
       <Books show={page === 'books'} books={books.data?.allBooks ?? []} />
       <NewBook show={page === 'add'} setError={notify} />
-      <Recommendations show={page === 'recommend'} books={books.data?.allBooks ?? []} user={user.data?.me}/>
+      <Recommendations show={page === 'recommend'} user={user.data?.me} />
 
-      {!token && page === 'login' && (
-        <LoginForm setToken={setToken} />
-      )}
+      {!token && page === 'login' && <LoginForm setToken={setToken} />}
     </div>
   )
 }

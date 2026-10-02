@@ -7,6 +7,10 @@ const { GraphQLError } = require('graphql')
 const jwt = require('jsonwebtoken')
 const User = require('./models/user')
 
+const { PubSub } = require('graphql-subscriptions')
+
+const pubsub = new PubSub()
+
 const resolvers = {
   Query: {
     authorCount: async () => Author.collection.countDocuments(),
@@ -140,6 +144,8 @@ const resolvers = {
         })
       }
 
+      pubsub.publish('BOOK_ADDED', { bookAdded: book })
+
       return book
     },
     editAuthor: async (root, args, context) => {
@@ -215,6 +221,12 @@ const resolvers = {
       return true
     },
   }, // mutation ending bracket
+
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterableIterator('BOOK_ADDED'),
+    },
+  },
 }
 
 module.exports = resolvers

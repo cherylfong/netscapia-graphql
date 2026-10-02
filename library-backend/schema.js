@@ -45,6 +45,10 @@ const typeDefs = /* GraphQL */ `
   type Token {
     value: String!
   }
+
+  type Subscription {
+    bookAdded: Book!
+  }
 `
 
 module.exports = typeDefs

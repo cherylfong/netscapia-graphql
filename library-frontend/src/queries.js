@@ -5,7 +5,10 @@ export const ALL_AUTHORS = gql`
     allAuthors {
       name
       born
-      bookCount
+      id
+      bookCount {
+        id
+      }
     }
   }
 `
@@ -25,7 +28,6 @@ export const ALL_BOOKS = gql`
     }
   }
 `
-
 
 export const USER_INFO = gql`
   query Me {
@@ -95,4 +97,3 @@ export const BOOK_ADDED = gql`
     }
   }
 `
-

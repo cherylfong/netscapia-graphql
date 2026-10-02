@@ -15,17 +15,17 @@ const resolvers = {
   Query: {
     authorCount: async () => Author.collection.countDocuments(),
 
-    allAuthors: async () => Author.find({}).exec(),
+    allAuthors: async () => Author.find({}).populate('bookCount').exec(),
 
-    bookCount: async (root, args) => {
-      if (!args.name) {
-        return Book.countDocuments({}).exec()
-      }
+    // bookCount: async (root, args) => {
+    //   if (!args.name) {
+    //     return Book.countDocuments({}).exec()
+    //   }
 
-      const author = await Author.findOne({ name: args.name }).exec()
+    //   const author = await Author.findOne({ name: args.name }).exec()
 
-      return author ? Book.countDocuments({ author: author._id }).exec() : 0
-    },
+    //   return author ? Book.countDocuments({ author: author._id }).exec() : 0
+    // },
 
     allBooks: async (root, args) => {
       const filter = {}
@@ -62,10 +62,11 @@ const resolvers = {
   },
 
   // self-defined resolver
-  Author: {
-    // receives parent author object as param
-    bookCount: (author) => Book.countDocuments({ author: author._id }).exec(),
-  },
+  // Author: {
+  //   // receives parent author object as param
+  //   bookCount: (author) => Book.countDocuments({ author: author._id }).exec(),
+  // },
+  // COMMENTED OUT TO USE DEFAULT RESOLVER
 
   Mutation: {
     addBook: async (root, args, context) => {
@@ -133,6 +134,8 @@ const resolvers = {
 
       try {
         await book.save()
+        author.bookCount = author.bookCount.concat(book._id)
+        await author.save()
         await book.populate('author')
       } catch (error) {
         throw new GraphQLError(`Saving BOOK failed: ${error.message}`, {

@@ -79,7 +79,7 @@ A way to keep the cache in sync is to use the useMutation hook's [refetchQueries
 
 ### Apollo Client Handling Application State
 
-It is tyipcal for Apollo Client manage most of the application's state, besides for form state for example. Using Redux or Zustand may not be necessary when using GraphQL.
+It is typical for Apollo Client manage most of the application's state, besides for form state for example. Using Redux or Zustand may not be necessary when using GraphQL.
 
 In some cases, Apollo enables saving the application's local state to Apollo [cache](https://www.apollographql.com/docs/react/local-state/local-state-management/).
 
@@ -105,7 +105,7 @@ Database setup with mongoose.
 npm install mongoose
 ```
 
-Define `MONGODB_URI` and `PORT` enviroment variables in `.env` file. Instructions can be found on this [page](https://fullstackopen.com/en/part3/saving_data_to_mongo_db#defining-environment-variables-using-the-dotenv-library).
+Define `MONGODB_URI` and `PORT` environment variables in `.env` file. Instructions can be found on this [page](https://fullstackopen.com/en/part3/saving_data_to_mongo_db#defining-environment-variables-using-the-dotenv-library).
 
 In reference to `resolvers,js`:
 
@@ -140,7 +140,7 @@ Below is an image that shows passing the JWT Bearer token via the Apollo Client:
 
 ### User Login and Logout
 
-Resetting the cache is done using the Apollo client object’s [resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient#resetstore)  method, 
+Resetting the cache is done using the Apollo client object’s [resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient#resetstore)  method,
 
 The client can be accessed with the [useApolloClient](https://www.apollographql.com/docs/react/api/react/useApolloClient) hook.
 
@@ -255,10 +255,70 @@ GraphQL subscriptions broadcasts changes to all subscribers.
 
 [`startStandaloneServer`](https://www.apollographql.com/docs/apollo-server/api/standalone/#startstandaloneserver) does not allow adding subscriptions to the application. Thus cannot be used.
 
-It can be replaced with the[expressMiddleware](https://www.apollographql.com/docs/apollo-server/api/express-middleware/) function.
+**It can be replaced with the [expressMiddleware](https://www.apollographql.com/docs/apollo-server/api/express-middleware/) function.**
 
 Install with:
 
 ```bash
 npm install express cors @as-integrations/express5
 ```
+
+The GraphQL server must be started before the Express application can begin listening on the specified port.
+
+The plugin [`ApolloServerPluginDrainHttpServer`](https://www.apollographql.com/docs/apollo-server/api/plugin/drain-http-server) ensures that the server is shut down cleanly when the server process is stopped. For example, it makes it possible to finish processing requests and close client connections so that requests are not left dangling.
+
+**Install websocket related packages to enable the server to provide subscribers to listen.**
+
+```bash
+npm install graphql-ws ws @graphql-tools/schema
+```
+
+Install the GraphQL library that enables [publishing and subscribing](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) on the server:
+
+```bash
+npm install graphql-subscriptions
+```
+
+The `Subscription` resolver registers and saves info about all the clients that are listening to the subscription.
+
+The listening clients are saved to a [iterator object](https://www.apollographql.com/docs/apollo-server/data/subscriptions/#listening-for-events).
+
+The [GraphQL PubSub](https://www.apollographql.com/docs/apollo-server/data/subscriptions#the-pubsub-class) object allows publishing operations to all subscribes using the `publish` method.
+
+For finer details on configuration refer to [https://www.apollographql.com/docs/apollo-server/data/subscriptions](https://www.apollographql.com/docs/apollo-server/data/subscriptions).
+
+#### To enable subscriptions from the client side
+
+Install the GraphQL websocket library:
+
+```bash
+npm install graphql-ws
+```
+
+The application must have an HTTP connection as well as a WebSocket connection to the GraphQL server:
+
+```javascript
+const httpLink = new HttpLink({ uri: 'http://localhost:4000' })
+
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: 'ws://localhost:4000',
+  }),
+)
+```
+
+Subscriptions are created using the [`useSubscription`](https://www.apollographql.com/docs/react/api/react/hooks/#usesubscription) hook function.
+
+As a good practice, the user should see the changes they make them in the application immediately.
+
+> The cache update performed by the subscription may happen with a delay and cannot be fully relied upon
+
+Hence, the cache should be updated by the `useSubscription` hook and directly in a component while ensuring that the cache does not contain duplicates by comparing an object's unique IDs.
+
+#### Mutations to Existing Objects do not need to call Update Manually
+
+Apollo's `InMemoryCache` stores each object by its type and id, for example `Person:6ab2a327....`.
+
+When a mutation returns an object that includes its `id`, Apollo automatically merges the new fields into the cached object.
+
+Every query showing that person, including `ALL_PERSONS`, then re-renders with the new phone number. `addPersonToCache` would find the person already in the list and return it unchanged anyway.

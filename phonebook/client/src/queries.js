@@ -14,7 +14,9 @@ const PERSON_DETAILS = gql`
 
 export const ALL_PERSONS = gql`
   query {
-    ...PersonDetails
+    allPersons {
+      ...PersonDetails
+    }
   }
   ${PERSON_DETAILS}
 `
@@ -51,15 +53,10 @@ export const CREATE_PERSON = gql`
 export const EDIT_NUMBER = gql`
   mutation editNumber($name: String!, $phone: String!) {
     editNumber(name: $name, phone: $phone) {
-      name
-      phone
-      address {
-        street
-        city
-      }
-      id
+      ...PersonDetails
     }
   }
+  ${PERSON_DETAILS}
 `
 
 export const LOGIN = gql`
@@ -68,4 +65,14 @@ export const LOGIN = gql`
       token
     }
   }
+`
+
+export const PERSON_ADDED = gql`
+  subscription {
+    personAdded {
+      ...PersonDetails
+    }
+  }
+
+  ${PERSON_DETAILS}
 `

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation } from '@apollo/client/react'
-import { ALL_PERSONS, CREATE_PERSON } from '../queries'
+import { CREATE_PERSON } from '../queries'
+import { addPersonToCache } from '../utils/apolloCache'
 
 const PersonForm = ({ setError }) => {
   const [name, setName] = useState('')
@@ -9,23 +10,16 @@ const PersonForm = ({ setError }) => {
   const [city, setCity] = useState('')
 
   const [createPerson] = useMutation(CREATE_PERSON, {
-    // query rerun even without new updates
-    // refetchQueries: [{ query: ALL_PERSONS }],
-    // manual cache update
-     update: (cache, response) => {
-      cache.updateQuery({ query: ALL_PERSONS }, ({ allPersons }) => {
-        return {
-          allPersons: allPersons.concat(response.data.addPerson),
-        }
-      })
-    },
     onError: (error) => setError(error.message),
+    update: (cache, response) => {
+      const addedPerson = response.data.addPerson
+      addPersonToCache(cache, addedPerson)
+    },
   })
 
   const submit = async (event) => {
     event.preventDefault()
 
-    // allows creating person with empty phone number
     createPerson({
       variables: {
         name,

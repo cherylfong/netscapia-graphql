@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { useQuery } from '@apollo/client/react'
+import {
+  useApolloClient,
+  useQuery,
+  useSubscription,
+} from '@apollo/client/react'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
@@ -7,10 +11,10 @@ import LoginForm from './components/LoginForm'
 import Notify from './components/Notify'
 import AuthorForm from './components/AuthorForm'
 import Recommendations from './components/Recommendations'
-import { ALL_AUTHORS, ALL_BOOKS, USER_INFO } from './queries'
-import { useApolloClient } from '@apollo/client/react'
+import { ALL_AUTHORS, ALL_BOOKS, USER_INFO, BOOK_ADDED } from './queries'
 
 import { useNotification } from './NotificationContext'
+import { addBookToCache } from './utils/apolloCache'
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem('library-user-token'))
@@ -37,6 +41,15 @@ const App = () => {
     booksData: books.data,
     userLoading: user.loading,
     userError: user.error,
+  })
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      const addedBook = data.data.bookAdded
+      notify(`${addedBook.title} added`)
+      window.alert(`NEW BOOK ALERT!\n\n${addedBook.title} added`)
+      addBookToCache(client.cache, addedBook)
+    },
   })
 
   if (result.loading || books.loading) {

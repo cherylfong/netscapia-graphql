@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation } from '@apollo/client/react'
 import { ALL_BOOKS, ADD_BOOK, ALL_AUTHORS } from '../queries'
 import { useNotification } from '../NotificationContext'
+import { addBookToCache } from '../utils/apolloCache'
 
 const NewBook = (props) => {
   const [title, setTitle] = useState('')
@@ -15,6 +16,10 @@ const NewBook = (props) => {
     refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
     onCompleted: () => notify('book added'),
     onError: (error) => notify(error.message),
+    update: (cache, response) => {
+      const addedBook = response.data.addBook
+      addBookToCache(cache, addedBook)
+    },
   })
 
   if (!props.show) {

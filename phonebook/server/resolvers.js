@@ -11,13 +11,16 @@ const resolvers = {
   Query: {
     personCount: async () => Person.collection.countDocuments(),
     allPersons: async (root, args) => {
+      console.log('Person.find')
       if (!args.phone) {
-        return Person.find({})
+        return Person.find({}).populate('friendOf')
       }
 
-      return Person.find({ phone: { $exists: args.phone === 'YES' } })
+      return Person.find({ phone: { $exists: args.phone === 'YES' } }).populate(
+        'friendOf',
+      )
     },
-    findPerson: async (root, args) => Person.findOne({ name: args.name }),
+    findPerson: async (root, args) => Person.findOne({ name: args.name }).populate('friendOf'),
     me: (root, args, context) => {
       return context.currentUser
     },
@@ -29,6 +32,19 @@ const resolvers = {
         city,
       }
     },
+
+    // every user who has this person as a friend: the creator (through addPerson) plus anyone who later ran addAsFriend.
+    // friendOf: async (root) => {
+    //   console.log('User.find')
+    //   const friends = await User.find({
+    //     friends: {
+    //       $in: [root._id],
+    //     },
+    //   })
+
+    //   return friends
+    // },
+    // removed so that friendOf uses GraphQL's default resolver which returns root.friendOf
   },
   Mutation: {
     addPerson: async (root, args, context) => {
@@ -53,7 +69,7 @@ const resolvers = {
         })
       }
 
-      const person = new Person({ ...args })
+      const person = new Person({ ...args, friendOf: [currentUser._id] })
 
       try {
         await person.save()
@@ -140,10 +156,19 @@ const resolvers = {
           .includes(person._id.toString())
 
       const person = await Person.findOne({ name: args.name })
-      if (nonFriendAlready(person)) {
-        currentUser.friends = currentUser.friends.concat(person)
+
+      if (!person) {
+        throw new GraphQLError(`Person not found: ${args.name}`, {
+          extensions: { code: 'BAD_USER_INPUT', invalidArgs: args.name },
+        })
       }
 
+      if (nonFriendAlready(person)) {
+        currentUser.friends = currentUser.friends.concat(person)
+        person.friendOf = person.friendOf.concat(currentUser._id)
+        await person.save()
+      }
+      
       await currentUser.save()
 
       return currentUser

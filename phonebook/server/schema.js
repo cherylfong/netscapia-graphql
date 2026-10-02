@@ -8,6 +8,7 @@ const typeDefs = /* GraphQL */ `
     phone: String
     address: Address!
     city: String!
+    friendOf: [User!]!
     id: ID!
   }
   enum YesNo {

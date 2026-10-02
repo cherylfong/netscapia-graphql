@@ -25,6 +25,9 @@ export const FIND_PERSON = gql`
   query findPersonByName($nameToSearch: String!) {
     findPerson(name: $nameToSearch) {
       ...PersonDetails
+      friendOf {
+      username
+    }
     }
   }
 

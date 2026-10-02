@@ -50,6 +50,10 @@ const typeDefs = /* GraphQL */ `
     # add person to a user's friend array
     addAsFriend(name: String!): User
   }
+
+  type Subscription {
+    personAdded: Person!
+  }
 `
 
 module.exports = typeDefs

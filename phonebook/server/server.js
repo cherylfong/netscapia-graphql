@@ -8,6 +8,8 @@ const express = require('express')
 const { makeExecutableSchema } = require('@graphql-tools/schema')
 const http = require('http')
 const jwt = require('jsonwebtoken')
+const { WebSocketServer } = require('ws')
+const { useServer } = require('graphql-ws/use/ws')
 
 const resolvers = require('./resolvers')
 const typeDefs = require('./schema')
@@ -25,15 +27,33 @@ const getUserFromAuthHeader = async (auth) => {
 const startServer = async (port) => {
   const app = express()
   const httpServer = http.createServer(app)
- 
-  const server = new ApolloServer({
-    schema: makeExecutableSchema({ typeDefs, resolvers }),
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/',
   })
- 
-  //  in order to be able to wait for the GraphQL server to start
+
+  const schema = makeExecutableSchema({ typeDefs, resolvers })
+  const serverCleanup = useServer({ schema }, wsServer)
+
+  const server = new ApolloServer({
+    schema,
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              await serverCleanup.dispose()
+            },
+          }
+        },
+      },
+    ],
+  })
+
   await server.start()
- 
+
   app.use(
     '/',
     cors(),
@@ -46,7 +66,7 @@ const startServer = async (port) => {
       },
     }),
   )
- 
+
   httpServer.listen(port, () =>
     console.log(`Server is now running on http://localhost:${port}`),
   )

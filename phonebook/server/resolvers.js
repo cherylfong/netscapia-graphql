@@ -1,32 +1,11 @@
-const { v4: uuidv4 } = require('uuid')
 const { GraphQLError } = require('graphql')
-const Person = require('./models/person')
-
 const jwt = require('jsonwebtoken')
+const { PubSub } = require('graphql-subscriptions')
+
+const Person = require('./models/person')
 const User = require('./models/user')
 
-// let persons = [
-//   {
-//     name: 'Arto Hellas',
-//     phone: '040-123543',
-//     street: 'Tapiolankatu 5 A',
-//     city: 'Espoo',
-//     id: '3d594650-3436-11e9-bc57-8b80ba54c431',
-//   },
-//   {
-//     name: 'Matti Luukkainen',
-//     phone: '040-432342',
-//     street: 'Malminkaari 10 A',
-//     city: 'Helsinki',
-//     id: '3d599470-3436-11e9-bc57-8b80ba54c431',
-//   },
-//   {
-//     name: 'Venla Ruuska',
-//     street: 'Nallemäentie 22 C',
-//     city: 'Helsinki',
-//     id: '3d599471-3436-11e9-bc57-8b80ba54c431',
-//   },
-// ]
+const pubsub = new PubSub()
 
 const resolvers = {
   Query: {
@@ -39,16 +18,11 @@ const resolvers = {
       return Person.find({ phone: { $exists: args.phone === 'YES' } })
     },
     findPerson: async (root, args) => Person.findOne({ name: args.name }),
-    // context is given in server.js
     me: (root, args, context) => {
       return context.currentUser
     },
   },
-
-  // self-defined resolver
   Person: {
-    // root is person object
-    // similar to 'this' in Java
     address: ({ street, city }) => {
       return {
         street,
@@ -56,12 +30,10 @@ const resolvers = {
       }
     },
   },
-
   Mutation: {
-    addPerson: async (parent, args, context, info) => {
+    addPerson: async (root, args, context) => {
       const currentUser = context.currentUser
 
-      // must be authenticated to add person
       if (!currentUser) {
         throw new GraphQLError('not authenticated', {
           extensions: {
@@ -69,6 +41,7 @@ const resolvers = {
           },
         })
       }
+
       const nameExists = await Person.exists({ name: args.name })
 
       if (nameExists) {
@@ -84,7 +57,6 @@ const resolvers = {
 
       try {
         await person.save()
-        // add person to logged in user's friend array
         currentUser.friends = currentUser.friends.concat(person)
         await currentUser.save()
       } catch (error) {
@@ -96,6 +68,8 @@ const resolvers = {
           },
         })
       }
+
+      pubsub.publish('PERSON_ADDED', { personAdded: person })
 
       return person
     },
@@ -122,7 +96,6 @@ const resolvers = {
 
       return person
     },
-
     createUser: async (root, args) => {
       const user = new User({ username: args.username })
 
@@ -139,7 +112,6 @@ const resolvers = {
     login: async (root, args) => {
       const user = await User.findOne({ username: args.username })
 
-      // password is HARDCODED !!
       if (!user || args.password !== 'secret') {
         throw new GraphQLError('wrong credentials', {
           extensions: {
@@ -155,7 +127,6 @@ const resolvers = {
 
       return { token: jwt.sign(userForToken, process.env.JWT_SECRET) }
     },
-
     addAsFriend: async (root, args, { currentUser }) => {
       if (!currentUser) {
         throw new GraphQLError('not authenticated', {
@@ -169,16 +140,6 @@ const resolvers = {
           .includes(person._id.toString())
 
       const person = await Person.findOne({ name: args.name })
-
-      if (!person) {
-        throw new GraphQLError("The name didn't found", {
-          extensions: {
-            code: 'BAD_USER_INPUT',
-            invalidArgs: args.name,
-          },
-        })
-      }
-
       if (nonFriendAlready(person)) {
         currentUser.friends = currentUser.friends.concat(person)
       }
@@ -186,6 +147,11 @@ const resolvers = {
       await currentUser.save()
 
       return currentUser
+    },
+  },
+  Subscription: {
+    personAdded: {
+      subscribe: () => pubsub.asyncIterableIterator('PERSON_ADDED'),
     },
   },
 }

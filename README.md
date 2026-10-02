@@ -19,7 +19,6 @@ Branches `chapter-2` and `chapter-3` do not have triggered tests through GitHub 
 <details>
 <summary> chapter-5 </summary>
 
-
 [![E2E tests (library)](https://github.com/cherylfong/netscapia-graphql/actions/workflows/test-chapter5.yml/badge.svg?branch=chapter-5)](https://github.com/cherylfong/netscapia-graphql/actions/workflows/test-chapter5.yml)
 </details>
 
@@ -322,3 +321,99 @@ Apollo's `InMemoryCache` stores each object by its type and id, for example `Per
 When a mutation returns an object that includes its `id`, Apollo automatically merges the new fields into the cached object.
 
 Every query showing that person, including `ALL_PERSONS`, then re-renders with the new phone number. `addPersonToCache` would find the person already in the list and return it unchanged anyway.
+
+### Resolving the N+1 Problem in the Library Application
+
+This file below is saved as `library-backend/backfillBookCount.js`.
+
+```javascript
+require('dotenv').config()
+
+const mongoose = require('mongoose')
+const connectToDatabase = require('./db')
+const Author = require('./models/author')
+const Book = require('./models/book')
+
+const backfill = async () => {
+  await connectToDatabase(process.env.MONGODB_URI)
+
+  const authors = await Author.find({})
+
+  for (const author of authors) {
+    // every book whose `author` field points at this author's _id
+    const books = await Book.find({ author: author._id })
+    const bookIds = books.map((b) => b._id)
+
+    // updateOne does not revalidate Author
+    await Author.updateOne(
+      { _id: author._id },
+
+      // replace the whole array with bookIds
+      { $set: { bookCount: bookIds } },
+    )
+
+    console.log(`${author.name}: ${bookIds.length} book(s)`)
+  }
+
+  await mongoose.connection.close()
+}
+
+backfill()
+
+```
+
+The purpose of this file is add the IDs of Book objects to the new attribute known as the `BookCount` array of each Author object.
+
+The scheme of Author is now:
+
+```GraphQL
+  type Author {
+    name: String!
+    id: ID!
+    born: Int
+    bookCount: [Book!]!
+  }
+```
+
+Books that were added to MongoDB before the new attribute of Author was implemented need to be added retroactively to this `bookCount` array. Without it, the following query:
+
+```GraphQL
+query Query {
+  allAuthors {
+    name
+    bookCount {
+      title
+    }
+  }
+}
+```
+
+Will return, for example, empty `BookCount` arrays:
+
+```JSON
+{
+  "data": {
+    "allAuthors": [
+      {
+        "name": "test-author",
+        "bookCount": []
+      },
+      {
+        "name": "test-author-0",
+        "bookCount": []
+      },
+      {
+        "name": "test-sub-1-author",
+        "bookCount": []
+      },
+     //....
+    ]
+  }
+}
+```
+
+The file was excuted in this manner:
+
+```bash
+node backfillBookCount.js
+```

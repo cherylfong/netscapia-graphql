@@ -4,6 +4,10 @@ This is [part 8 of the fullstack open course](https://fullstackopen.com/en/part8
 
 [New Course Platform for GraphQL]( https://courses.mooc.fi/org/uh-cs/courses/full-stack-open-graphql )
 
+### 🏅 Verified Completion
+
+https://courses.mooc.fi/certificates/validate/rdx6jmxtic3jndf
+
 ### Github Actions Test Status
 
 Branches `chapter-2` and `chapter-3` do not have triggered tests through GitHub workflow actions. There is no `chapter-1` branch.
